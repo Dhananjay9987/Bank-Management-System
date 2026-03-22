@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Transactions</title>
+</head>
+<body>
+
+<h2>Transaction History</h2>
+
+<form method="post">
+    <input name="account" placeholder="Enter Account Number" required>
+    <button type="submit">View</button>
+</form>
+
+<hr>
+
+{% if transactions %}
+    <table border="1">
+        <tr>
+            <th>Type</th>
+            <th>Amount</th>
+            <th>Date</th>
+        </tr>
+
+        {% for t in transactions %}
+        <tr>
+            <td>{{ t.type }}</td>
+            <td>{{ t.amount }}</td>
+            <td>{{ t.timestamp }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endif %}
+
+</body>
+</html>
