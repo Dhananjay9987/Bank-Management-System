@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, url_for
 from system import auth_manager, bank_ops, init_db
 
 app = Flask(__name__)
@@ -10,17 +10,22 @@ init_db()
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
+        username = request.form['username'].strip()
+        password = request.form['password'].strip()
+        role = request.form.get('role', 'user')
 
-        success, msg = auth_manager.register_user(username, password)
+        if not username or not password:
+            return render_template('register.html', error="All fields required")
+
+        success, msg = auth_manager.register_user(username, password, role)
 
         if success:
-            return redirect('/')   # go to login after register
+            return redirect(url_for('login'))
         else:
             return render_template('register.html', error=msg)
 
     return render_template('register.html')
+
 
 # ---------------- LOGIN ----------------
 @app.route('/', methods=['GET', 'POST'])
@@ -33,20 +38,71 @@ def login():
 
         if user:
             session['user_id'] = user.id
-            return redirect('/dashboard')
-        else:
-            return render_template('login.html', error=msg)
+            session['username'] = user.username
+            session['role'] = user.role
+
+            if user.role == 'admin':
+                return redirect('/admin/dashboard')
+            else:
+                return redirect('/dashboard')
+
+        return render_template('login.html', error=msg)
 
     return render_template('login.html')
 
 
-# ---------------- DASHBOARD ----------------
+# ---------------- USER DASHBOARD ----------------
 @app.route('/dashboard')
 def dashboard():
     if 'user_id' not in session:
         return redirect('/')
 
-    return render_template('dashboard.html')
+    if session.get('role') != 'user':
+        return redirect('/admin/dashboard')
+
+    user_id = session['user_id']   # ✅ FIXED
+
+    accounts, msg = bank_ops.get_user_accounts(user_id)
+
+    return render_template(
+        'dashboard.html',
+        username=session['username'],
+        accounts=accounts,
+        msg=msg
+    )
+
+
+# ---------------- ADMIN DASHBOARD ----------------
+@app.route('/admin/dashboard')
+def admin_dashboard():
+    if 'user_id' not in session:
+        return redirect('/')
+
+    if session.get('role') != 'admin':
+        return redirect('/dashboard')
+
+    # 🔥 OPTIONAL: show all accounts to admin
+    from system import admin_ops
+    accounts, msg = admin_ops.get_all_accounts()
+
+    return render_template(
+        'dashboard.html',
+        username=session['username'],
+        accounts=accounts,
+        msg="Admin Panel"
+    )
+
+
+# ---------------- CREATE ACCOUNT ----------------
+@app.route('/create_account', methods=['POST'])
+def create_account():
+    if 'user_id' not in session:
+        return redirect('/')
+
+    acc_type = request.form['type']
+    bank_ops.create_account(session['user_id'], acc_type)
+
+    return redirect('/dashboard')
 
 
 # ---------------- DEPOSIT ----------------
@@ -89,32 +145,21 @@ def transfer():
     return redirect('/dashboard')
 
 
-# ---------------- CREATE ACCOUNT ----------------
-@app.route('/create_account', methods=['POST'])
-def create_account():
-    if 'user_id' not in session:
-        return redirect('/')
-
-    user_id = session['user_id']
-    acc_type = request.form['type']
-
-    bank_ops.create_account(user_id, acc_type)
-    return redirect('/dashboard')
-
 # ---------------- TRANSACTION HISTORY ----------------
-@app.route('/transactions', methods=['GET', 'POST'])
+@app.route('/transactions', methods=['GET'])
 def transactions():
     if 'user_id' not in session:
         return redirect('/')
 
-    if request.method == 'POST':
-        account = request.form['account']
+    # ✅ get account from dashboard (GET request)
+    account = request.args.get('account')
 
+    if account:
         transactions, msg = bank_ops.get_transaction_history(account)
-
         return render_template('transactions.html', transactions=transactions, msg=msg)
 
-    return render_template('transactions.html')
+    # if no account selected → go back
+    return redirect('/dashboard')
 
 
 # ---------------- LOGOUT ----------------
@@ -126,4 +171,4 @@ def logout():
 
 # ---------------- RUN APP ----------------
 if __name__ == "__main__":
-    app.run(debug=True, use_reloader=False)
+    app.run(host="0.0.0.0", port=5000, debug=True)

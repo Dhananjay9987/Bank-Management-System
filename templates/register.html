@@ -54,7 +54,8 @@
             margin-bottom: 5px;
         }
 
-        .input-group input {
+        .input-group input,
+        .input-group select {
             width: 100%;
             padding: 12px;
             border-radius: 8px;
@@ -63,7 +64,8 @@
             transition: 0.3s;
         }
 
-        .input-group input:focus {
+        .input-group input:focus,
+        .input-group select:focus {
             border-color: #4facfe;
             box-shadow: 0 0 6px rgba(79,172,254,0.3);
         }
@@ -119,6 +121,7 @@
     {% endif %}
 
     <form method="POST">
+
         <div class="input-group">
             <label>Username</label>
             <input type="text" name="username" required>
@@ -127,6 +130,15 @@
         <div class="input-group">
             <label>Password</label>
             <input type="password" name="password" required>
+        </div>
+
+        <!-- 🔥 ROLE FIELD ADDED -->
+        <div class="input-group">
+            <label>Role</label>
+            <select name="role" required>
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+            </select>
         </div>
 
         <button type="submit">Register</button>

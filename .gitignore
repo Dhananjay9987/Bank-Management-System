@@ -1,0 +1,4 @@
+bank.db
+__pycache__/
+.venv/
+.env

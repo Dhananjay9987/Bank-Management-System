@@ -105,6 +105,12 @@
             text-decoration: underline;
         }
 
+        .info {
+            font-size: 12px;
+            color: #888;
+            margin-top: 10px;
+        }
+
     </style>
 </head>
 
@@ -118,6 +124,7 @@
         <div class="error">{{ error }}</div>
     {% endif %}
 
+    <!-- LOGIN FORM -->
     <form method="POST">
         <div class="input-group">
             <label>Username</label>
@@ -131,6 +138,11 @@
 
         <button type="submit">Sign In</button>
     </form>
+
+    <!-- OPTIONAL INFO -->
+    <div class="info">
+        Login will redirect based on your role (User/Admin)
+    </div>
 
     <div class="footer">
         New here? <a href="/register">Create Account</a>

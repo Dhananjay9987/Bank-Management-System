@@ -2,35 +2,156 @@
 <html>
 <head>
     <title>Transactions</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #eef2ff, #f0f9ff);
+            color: #1e293b;
+        }
+
+        /* Navbar */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background: linear-gradient(to right, #2563eb, #38bdf8);
+            color: white;
+        }
+
+        .navbar h2 {
+            font-weight: 600;
+        }
+
+        .logout {
+            background: white;
+            padding: 8px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #2563eb;
+            font-weight: 500;
+        }
+
+        /* Container */
+        .container {
+            padding: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+        }
+
+        .card h3 {
+            margin-bottom: 10px;
+            color: #2563eb;
+        }
+
+        .card h2 {
+            margin-bottom: 20px;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th {
+            background: #2563eb;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        table td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        table tr:hover {
+            background: #f1f5f9;
+        }
+
+        /* Back Button */
+        .back {
+            display: inline-block;
+            margin-bottom: 20px;
+            text-decoration: none;
+            background: #2563eb;
+            color: white;
+            padding: 8px 14px;
+            border-radius: 6px;
+        }
+
+        .no-data {
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 8px;
+            text-align: center;
+            color: #64748b;
+        }
+
+    </style>
 </head>
+
 <body>
 
-<h2>Transaction History</h2>
+<!-- Navbar -->
+<div class="navbar">
+    <h2>🏦 SmartBank</h2>
+    <a href="/logout" class="logout">Logout</a>
+</div>
 
-<form method="post">
-    <input name="account" placeholder="Enter Account Number" required>
-    <button type="submit">View</button>
-</form>
+<div class="container">
 
-<hr>
+    <!-- Back Button -->
+    <a href="/dashboard" class="back">← Back to Dashboard</a>
 
-{% if transactions %}
-    <table border="1">
-        <tr>
-            <th>Type</th>
-            <th>Amount</th>
-            <th>Date</th>
-        </tr>
+    <!-- Card -->
+    <div class="card">
 
-        {% for t in transactions %}
-        <tr>
-            <td>{{ t.type }}</td>
-            <td>{{ t.amount }}</td>
-            <td>{{ t.timestamp }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-{% endif %}
+        <h3>Account: {{ request.args.get('account') }}</h3>
+        <h2>Transaction History</h2>
+
+        {% if transactions %}
+            <table>
+                <tr>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th>Description</th>
+                </tr>
+
+                {% for txn in transactions %}
+                <tr>
+                    <td>{{ txn.type }}</td>
+                    <td>₹ {{ txn.amount }}</td>
+                    <td>{{ txn.timestamp }}</td>
+                    <td>{{ txn.description }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <div class="no-data">
+                No transactions found
+            </div>
+        {% endif %}
+
+    </div>
+
+</div>
 
 </body>
 </html>
